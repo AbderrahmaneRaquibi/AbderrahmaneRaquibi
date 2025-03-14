@@ -11,6 +11,34 @@ on:
     branches:
       - main
 jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create output branch if it does not exist
+        run: |
+          git fetch origin
+          if ! git rev-parse --verify origin/output; then
+            git checkout -b output
+            git push origin output
+          else
+            git checkout output
+          fi
+
+      - name: Push changes
+        run: |
+          git add .
+          git commit -m "Update output"
+          git push origin output
   generate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
